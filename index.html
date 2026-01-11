@@ -10,7 +10,7 @@
   overflow: hidden;
   touch-action: none;
 }
-<video id="video" autoplay playsinline></video>
+<video id="video" autoplay playsinline></video
 #sec-1 {
   width: 100vw;
   height: 100vh;
@@ -360,6 +360,25 @@ const camera = new Camera(video, {
 camera.start();
 
 // ===== END =====
+    </script><script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const video = document.getElementById("video");
+
+  if (!video) {
+    alert("video tag nahi mila");
+    return;
+  }
+
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      video.srcObject = stream;
+    })
+    .catch(err => {
+      alert("Camera error: " + err);
+    });
+
+});
     </script>
 
 </body>
