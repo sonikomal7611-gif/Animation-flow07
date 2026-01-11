@@ -2,14 +2,15 @@
 <html>
 <head>
     <title>kyu re madercho**</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <style>
   body {
   margin: 0;
   overflow: hidden;
   touch-action: none;
 }
-
+<video id="video" autoplay playsinline style="display:none"></video>
 #sec-1 {
   width: 100vw;
   height: 100vh;
@@ -295,6 +296,70 @@
   });
 });
 
+    </script><script>
+// ===== IRON MAN HAND GESTURE CONTROL =====
+
+// 🔴 SVG IDs (creator ke code se match karna)
+const eye = document.getElementById("moving");   // eye move
+const hud = document.getElementById("hud");      // glow / hud group
+
+const video = document.getElementById("video");
+
+// 🧠 MediaPipe Hands
+const hands = new Hands({
+  locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
+
+// ✋ Open / ✊ Fist detect
+function isHandOpen(lm) {
+  return lm[8].y < lm[6].y && lm[12].y < lm[10].y;
+}
+
+hands.onResults(results => {
+  if (!results.multiHandLandmarks) return;
+
+  const lm = results.multiHandLandmarks[0];
+  const index = lm[8];
+
+  // 👁️ Eye follow hand
+  const x = (index.x - 0.5) * 100;
+  const y = (index.y - 0.5) * 100;
+
+  eye.setAttribute(
+    "transform",
+    `translate(${x},${y})`
+  );
+
+  // ✋ OPEN → HUD ON
+  if (isHandOpen(lm)) {
+    hud.style.opacity = "1";
+    hud.style.filter = "drop-shadow(0 0 20px cyan)";
+  }
+  // ✊ FIST → HUD OFF
+  else {
+    hud.style.opacity = "0.2";
+    hud.style.filter = "none";
+  }
+});
+
+// 📷 Camera start
+const camera = new Camera(video, {
+  onFrame: async () => {
+    await hands.send({ image: video });
+  },
+  width: 640,
+  height: 480
+});
+
+camera.start();
+
+// ===== END =====
     </script>
 
 </body>
